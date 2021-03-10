@@ -1,6 +1,12 @@
 import React from 'react'
 // We'll need quite a few imports from react-router-dom
-
+import {
+  Route,
+  NavLink,
+  Switch,
+  useParams,
+  useRouteMatch
+} from 'react-router-dom'
 import ItemDetails from './ItemDetails'
 
 export default function Item(props) {
@@ -11,7 +17,14 @@ export default function Item(props) {
   // Beware! The ids are integers, whereas URL parameters are strings.
   // Beware! The JSX is expecting 'item' to exist instantly!
   // we use this hook to grab they dynamic parts of the path (:itemID).
-  const item = {}
+  const { itemID } = useParams()
+  const item = items.find(item => item.id == itemID)
+
+  // We use this hook to grab information about the way React Router matched this route.
+  const { path, url } = useRouteMatch()
+
+  // This guards against a crash (the data is not available instantaneously)
+  if (!items.length) return 'Getting your item...'
 
   return (
     <div className='item-wrapper'>
@@ -27,11 +40,30 @@ export default function Item(props) {
 
       <nav className='item-sub-nav'>
         {/* 👉 STEP 8 - Here go the NavLinks to `<current url>/shipping` and `<current url>/description` */}
+        {/* INSTRUCTOR: first do without the hook and explain how bad it is with long pathnames */}
+        {/*
+        <NavLink to={`/items-list/${item.id}`}>The story</Link>
+        <NavLink to={`/items-list/${item.id}/shipping`}>Shipping</Link>
+        */}
+        <NavLink to={`${url}/description`}>Description</NavLink>
+        <NavLink to={`${url}/shipping`}>Shipping</NavLink>
       </nav>
 
       {/* 👉 STEP 9 - Here go the Routes for `<current path>/shipping` and `<current path>/description` */}
-      {/* These Routes should render <ItemDetails /> */}
-
+      {/* These Routes should render <ItemDetails />  */}
+      <Switch>
+        {/* INSTRUCTOR: do without the hook and explain how bad it is with long paths */}
+        {/*
+        <Route path="/items-list/shipping"> etc </Route>
+        <Route path="/items-list/description"> etc </Route>
+        */}
+        <Route path={`${path}/shipping`}>
+          <ItemDetails text={item.shipping} />
+        </Route>
+        <Route path={`${path}/description`}>
+          <ItemDetails text={item.description} />
+        </Route>
+      </Switch>
       {/* 👉 STEP 10 - Shorten paths and urls with `useRouteMatch` hook */}
     </div>
   )
